@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:vahan_setu/core/repository/audit_log_repo/audit_log_repository.dart';
 import 'package:vahan_setu/core/repository/auth_repo/register_repository.dart';
 import 'package:vahan_setu/core/repository/dashboard_repo/dashboard_repository.dart';
 import 'package:vahan_setu/core/repository/doc_repo/document_repository.dart';
@@ -7,6 +8,7 @@ import 'package:vahan_setu/core/repository/expense_repo/expense_repository.dart'
 import 'package:vahan_setu/core/repository/tanker_repo/tanker_report_repository.dart';
 import 'package:vahan_setu/core/repository/tax_repo/tax_repository.dart';
 import 'package:vahan_setu/core/repository/vehicle_repo/vehicle_repository.dart';
+import 'package:vahan_setu/features/aduit_logs/presentation/bloc/audit_log_bloc.dart';
 
 import 'core/network/custom_http_client.dart';
 import 'core/theme/app_colors.dart';
@@ -56,6 +58,9 @@ class VahanSetuApp extends StatelessWidget {
         RepositoryProvider<ExpenseRepository>(
           create: (_) => ExpenseRepository(httpClient),
         ),
+        RepositoryProvider<AuditLogRepository>(
+          create: (_) => AuditLogRepository(httpClient),
+        ),
       ],
       child: MultiBlocProvider(
         providers: [
@@ -82,6 +87,10 @@ class VahanSetuApp extends StatelessWidget {
           ),
           BlocProvider<ExpenseBloc>(
             create: (context) => ExpenseBloc(context.read<ExpenseRepository>()),
+          ),
+          BlocProvider<AuditLogBloc>(
+            create: (context) =>
+                AuditLogBloc(context.read<AuditLogRepository>()),
           ),
         ],
         child: MaterialApp(

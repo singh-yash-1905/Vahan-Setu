@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../data/vehicle_model.dart';
@@ -92,30 +91,25 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Vehicle Specifications',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.primary,
+                        const Padding(
+                          padding: EdgeInsets.only(left: 4, bottom: 12),
+                          child: Text(
+                            'Vehicle Specifications',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.textPrimary,
+                            ),
                           ),
                         ),
-                        const SizedBox(height: 12),
                         Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
                             color: AppColors.surface,
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: AppColors.border),
-                            boxShadow: [
-                              BoxShadow(
-                                color: AppColors.primaryDark.withValues(
-                                  alpha: 0.04,
-                                ),
-                                blurRadius: 10,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
+                            borderRadius: BorderRadius.circular(15),
+                            border: Border.all(
+                              color: AppColors.border.withValues(alpha: 0.55),
+                            ),
                           ),
                           child: Column(
                             children: [
@@ -168,47 +162,53 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              // Replaced Heavy Gradient with Modern Tinted Card
                               Container(
                                 width: double.infinity,
                                 padding: const EdgeInsets.all(20),
                                 decoration: BoxDecoration(
-                                  gradient: const LinearGradient(
-                                    colors: [
-                                      AppColors.accentDark,
-                                      AppColors.primary,
-                                    ],
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                  ),
-                                  borderRadius: BorderRadius.circular(20),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: AppColors.accentDark.withValues(
-                                        alpha: 0.3,
-                                      ),
-                                      blurRadius: 12,
-                                      offset: const Offset(0, 6),
+                                  color: AppColors.cardGreenBg,
+                                  borderRadius: BorderRadius.circular(15),
+                                  border: Border.all(
+                                    color: AppColors.success.withValues(
+                                      alpha: 0.3,
                                     ),
-                                  ],
+                                  ),
                                 ),
                                 child: Column(
                                   children: [
+                                    Container(
+                                      width: 48,
+                                      height: 48,
+                                      decoration: BoxDecoration(
+                                        color: AppColors.success.withValues(
+                                          alpha: 0.15,
+                                        ),
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: const Icon(
+                                        Icons.toll,
+                                        color: AppColors.success,
+                                        size: 24,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 12),
                                     const Text(
                                       'Current Balance',
                                       style: TextStyle(
-                                        color: Colors.white70,
-                                        fontSize: 14,
+                                        color: AppColors.textSecondary,
+                                        fontSize: 13,
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
-                                    const SizedBox(height: 8),
+                                    const SizedBox(height: 4),
                                     FittedBox(
                                       fit: BoxFit.scaleDown,
                                       child: Text(
                                         '₹${state.fastag!.lastBalance}',
                                         style: const TextStyle(
-                                          color: AppColors.textLight,
-                                          fontSize: 36,
+                                          color: AppColors.textPrimary,
+                                          fontSize: 34,
                                           fontWeight: FontWeight.w900,
                                         ),
                                       ),
@@ -216,13 +216,17 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
                                   ],
                                 ),
                               ),
-                              const SizedBox(height: 20),
+                              const SizedBox(height: 16),
                               Container(
                                 padding: const EdgeInsets.all(16),
                                 decoration: BoxDecoration(
                                   color: AppColors.surface,
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(color: AppColors.border),
+                                  borderRadius: BorderRadius.circular(15),
+                                  border: Border.all(
+                                    color: AppColors.border.withValues(
+                                      alpha: 0.55,
+                                    ),
+                                  ),
                                 ),
                                 child: Column(
                                   children: [
@@ -268,66 +272,15 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
                           itemCount: state.challans!.length,
                           itemBuilder: (context, index) {
                             final challan = state.challans![index];
-                            return Card(
-                              color: AppColors.surface,
-                              elevation: 2,
-                              shadowColor: AppColors.primaryDark.withValues(
-                                alpha: 0.08,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                side: const BorderSide(color: AppColors.border),
-                              ),
-                              margin: const EdgeInsets.only(bottom: 12),
-                              child: Padding(
-                                padding: const EdgeInsets.all(16),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Expanded(
-                                          child: Text(
-                                            challan.challanNumber,
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              color: AppColors.textPrimary,
-                                              fontSize: 16,
-                                            ),
-                                          ),
-                                        ),
-                                        Text(
-                                          '₹${challan.amount}',
-                                          style: const TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.w900,
-                                            color: AppColors.error,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      'Authority: ${challan.authority}',
-                                      style: const TextStyle(
-                                        color: AppColors.textPrimary,
-                                        fontSize: 13,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      'Reason: ${challan.reason}',
-                                      style: const TextStyle(
-                                        color: AppColors.textSecondary,
-                                        fontSize: 13,
-                                        height: 1.3,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
+                            return _buildModernListCard(
+                              icon: Icons.receipt_long,
+                              iconColor: AppColors.error,
+                              title: challan.challanNumber,
+                              subtitle:
+                                  'Authority: ${challan.authority}\nReason: ${challan.reason}',
+                              trailingValue: '₹${challan.amount}',
+                              status: 'UNPAID', // Or derive from data
+                              statusColor: AppColors.error,
                             );
                           },
                         ),
@@ -357,86 +310,18 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
                             final charge = state.governmentCharges![index];
                             final bool isActive =
                                 charge.status.toUpperCase() == 'ACTIVE';
+                            final statusColor = isActive
+                                ? AppColors.success
+                                : AppColors.warning;
 
-                            return Container(
-                              margin: const EdgeInsets.only(bottom: 16),
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: AppColors.surface,
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(color: AppColors.border),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: AppColors.primaryDark.withValues(
-                                      alpha: 0.05,
-                                    ),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Expanded(
-                                        child: Text(
-                                          charge.chargeType.replaceAll(
-                                            '_',
-                                            ' ',
-                                          ),
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.w800,
-                                            fontSize: 16,
-                                            color: AppColors.primary,
-                                          ),
-                                        ),
-                                      ),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 8,
-                                          vertical: 4,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: isActive
-                                              ? AppColors.success.withValues(
-                                                  alpha: 0.1,
-                                                )
-                                              : AppColors.warning.withValues(
-                                                  alpha: 0.1,
-                                                ),
-                                          borderRadius: BorderRadius.circular(
-                                            8,
-                                          ),
-                                        ),
-                                        child: Text(
-                                          charge.status,
-                                          style: TextStyle(
-                                            color: isActive
-                                                ? AppColors.success
-                                                : AppColors.warning,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 11,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 16),
-                                  _buildDetailRow(
-                                    'Authority',
-                                    charge.authority,
-                                  ),
-                                  _buildDetailRow(
-                                    'Amount',
-                                    '₹${charge.amount}',
-                                    isLast: true,
-                                  ),
-                                ],
-                              ),
+                            return _buildModernListCard(
+                              icon: Icons.account_balance,
+                              iconColor: AppColors.primary,
+                              title: charge.chargeType.replaceAll('_', ' '),
+                              subtitle: 'Authority: ${charge.authority}',
+                              trailingValue: '₹${charge.amount}',
+                              status: charge.status,
+                              statusColor: statusColor,
                             );
                           },
                         ),
@@ -465,79 +350,18 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
                             final doc = state.documents![index];
                             final bool isValid =
                                 doc.status.toUpperCase() == 'VALID';
+                            final statusColor = isValid
+                                ? AppColors.success
+                                : AppColors.error;
 
-                            return Container(
-                              margin: const EdgeInsets.only(bottom: 12),
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: AppColors.surface,
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(color: AppColors.border),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: AppColors.primaryDark.withValues(
-                                      alpha: 0.05,
-                                    ),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Expanded(
-                                        child: Text(
-                                          doc.documentType.replaceAll('_', ' '),
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.w800,
-                                            fontSize: 16,
-                                            color: AppColors.primary,
-                                          ),
-                                        ),
-                                      ),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 8,
-                                          vertical: 4,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: isValid
-                                              ? AppColors.success.withValues(
-                                                  alpha: 0.1,
-                                                )
-                                              : AppColors.error.withValues(
-                                                  alpha: 0.1,
-                                                ),
-                                          borderRadius: BorderRadius.circular(
-                                            8,
-                                          ),
-                                        ),
-                                        child: Text(
-                                          doc.status,
-                                          style: TextStyle(
-                                            color: isValid
-                                                ? AppColors.success
-                                                : AppColors.error,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 11,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 16),
-                                  _buildDetailRow(
-                                    'Doc Number',
-                                    doc.documentNumber,
-                                    isLast: true,
-                                  ),
-                                ],
-                              ),
+                            return _buildModernListCard(
+                              icon: Icons.folder,
+                              iconColor: AppColors.accentDark,
+                              title: doc.documentType.replaceAll('_', ' '),
+                              subtitle: 'Doc Number: ${doc.documentNumber}',
+                              trailingValue: '',
+                              status: doc.status,
+                              statusColor: statusColor,
                             );
                           },
                         ),
@@ -568,9 +392,9 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
             child: Text(
               label,
               style: const TextStyle(
-                fontSize: 14,
+                fontSize: 13,
                 color: AppColors.textSecondary,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),
@@ -581,10 +405,111 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
               value,
               textAlign: TextAlign.right,
               style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
+                fontSize: 13,
+                fontWeight: FontWeight.w800,
                 color: AppColors.textPrimary,
               ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Modern List Card matching the styling found in VehicleListCard
+  Widget _buildModernListCard({
+    required IconData icon,
+    required Color iconColor,
+    required String title,
+    required String subtitle,
+    required String trailingValue,
+    required String status,
+    required Color statusColor,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(15),
+        border: Border.all(color: AppColors.border.withValues(alpha: 0.55)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Tinted Icon Container
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: iconColor.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, size: 22, color: iconColor),
+          ),
+          const SizedBox(width: 12),
+          // Content
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                    ),
+                    if (trailingValue.isNotEmpty)
+                      Text(
+                        trailingValue,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w900,
+                          color: iconColor, // Use the primary theme color of the card for the value
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  subtitle,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.textSecondary,
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                // Modern Status Pill
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: statusColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    status.toUpperCase(),
+                    style: TextStyle(
+                      fontSize: 9,
+                      fontWeight: FontWeight.w800,
+                      color: statusColor,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],

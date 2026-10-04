@@ -32,7 +32,13 @@ class _TaxesTabState extends State<TaxesTab> {
       _filters.length - 1,
     );
 
-    _fetchDataForIndex(_selectedFilterIndex);
+    // Fetch the correct filter immediately
+    // when TaxesTab is opened from the dashboard.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _fetchDataForIndex(_selectedFilterIndex);
+      }
+    });
   }
 
   void _fetchDataForIndex(int index) {
@@ -83,6 +89,9 @@ class _TaxesTabState extends State<TaxesTab> {
       ),
       body: Column(
         children: [
+          // ------------------------------------------------------------
+          // TAX FILTERS
+          // ------------------------------------------------------------
           Container(
             height: 60,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -108,13 +117,15 @@ class _TaxesTabState extends State<TaxesTab> {
                           : FontWeight.normal,
                     ),
                     onSelected: (selected) {
-                      if (selected && _selectedFilterIndex != index) {
-                        setState(() {
-                          _selectedFilterIndex = index;
-                        });
-
-                        _fetchDataForIndex(index);
+                      if (!selected || _selectedFilterIndex == index) {
+                        return;
                       }
+
+                      setState(() {
+                        _selectedFilterIndex = index;
+                      });
+
+                      _fetchDataForIndex(index);
                     },
                   ),
                 );
@@ -122,6 +133,9 @@ class _TaxesTabState extends State<TaxesTab> {
             ),
           ),
 
+          // ------------------------------------------------------------
+          // TAX LIST
+          // ------------------------------------------------------------
           Expanded(
             child: BlocConsumer<TaxBloc, TaxState>(
               listener: (context, state) async {
@@ -156,8 +170,12 @@ class _TaxesTabState extends State<TaxesTab> {
                     }
                   }
 
-                  _fetchDataForIndex(_selectedFilterIndex);
-                } else if (state is TaxError) {
+                  if (mounted) {
+                    _fetchDataForIndex(_selectedFilterIndex);
+                  }
+                }
+
+                if (state is TaxError) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(state.message),
@@ -166,7 +184,11 @@ class _TaxesTabState extends State<TaxesTab> {
                   );
                 }
               },
-              buildWhen: (previous, current) => current is! TaxExportSuccess,
+
+              buildWhen: (previous, current) {
+                return current is! TaxExportSuccess;
+              },
+
               builder: (context, state) {
                 if (state is TaxLoading) {
                   return const Center(
@@ -250,6 +272,7 @@ class _TaxesTabState extends State<TaxesTab> {
                                       ),
                                     ),
                                   ),
+
                                   Container(
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 8,
@@ -311,6 +334,7 @@ class _TaxesTabState extends State<TaxesTab> {
                                       color: AppColors.primaryDark,
                                     ),
                                   ),
+
                                   Text(
                                     'Vehicle ID: ${tax.vehicleId}',
                                     style: const TextStyle(

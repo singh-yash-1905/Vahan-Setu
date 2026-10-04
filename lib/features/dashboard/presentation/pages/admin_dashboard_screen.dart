@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:vahan_setu/features/aduit_logs/presentation/pages/audit_logs_screen.dart';
 
 import 'package:vahan_setu/features/dashboard/presentation/pages/dashboard_overview_tab.dart';
 
@@ -124,6 +125,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
       case 5:
         page = const TankerReportsTab();
+        break;
+      case 6: // ADDED THIS CASE
+        page = const AuditLogsScreen();
         break;
     }
 

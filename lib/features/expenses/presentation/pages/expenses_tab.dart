@@ -27,7 +27,7 @@ class _ExpensesTabState extends State<ExpensesTab> {
     'salary',
     'khuraki',
     'toll',
-    'road tax',
+    'road_tax',
     'others',
   ];
 

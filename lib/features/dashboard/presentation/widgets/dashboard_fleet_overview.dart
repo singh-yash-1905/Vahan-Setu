@@ -25,7 +25,7 @@ class DashboardFleetOverview extends StatelessWidget {
       children: [
         const DashboardSectionHeader(
           title: 'Fleet Overview',
-          subtitle: 'Current fleet and driver status',
+          subtitle: 'Current fleet status',
           icon: Icons.local_shipping_rounded,
           color: AppColors.primary,
         ),
@@ -37,48 +37,17 @@ class DashboardFleetOverview extends StatelessWidget {
             final bool wide = constraints.maxWidth >= 650;
 
             if (wide) {
-              return Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: DashboardProgressCard(
-                      title: 'Active Fleet',
-                      current: metrics.activeVehicles,
-                      total: metrics.totalVehicles,
-                    ),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: DashboardMetricCard(
-                      title: 'Total Drivers',
-                      value: metrics.totalDrivers,
-                      subtitle: 'Registered Drivers',
-                      icon: Icons.badge_rounded,
-                      themeColor: AppColors.primary,
-                      onTap: () {},
-                    ),
-                  ),
-                ],
+              return DashboardProgressCard(
+                title: 'Active Fleet',
+                current: metrics.activeVehicles,
+                total: metrics.totalVehicles,
               );
             }
 
-            return Column(
-              children: [
-                DashboardProgressCard(
-                  title: 'Active Fleet',
-                  current: metrics.activeVehicles,
-                  total: metrics.totalVehicles,
-                ),
-                const SizedBox(height: 12),
-                DashboardMetricCard(
-                  title: 'Total Drivers',
-                  value: metrics.totalDrivers,
-                  subtitle: 'Registered Drivers',
-                  icon: Icons.badge_rounded,
-                  themeColor: AppColors.primary,
-                  onTap: () {},
-                ),
-              ],
+            return DashboardProgressCard(
+              title: 'Active Fleet',
+              current: metrics.activeVehicles,
+              total: metrics.totalVehicles,
             );
           },
         ),

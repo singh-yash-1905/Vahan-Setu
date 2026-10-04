@@ -239,6 +239,9 @@ class AdminAppDrawer extends StatelessWidget {
         _buildDrawerItem(null, Icons.receipt_long_rounded, 'Tax & Charges', 3),
         _buildDrawerItem(null, Icons.folder_copy_rounded, 'Fleet Documents', 4),
         _buildDrawerItem(null, Icons.water_drop_rounded, 'Tanker Entries', 5),
+
+        // ADDED AUDIT LOGS HERE (Index 6)
+        _buildDrawerItem(null, Icons.history_rounded, 'Audit Logs', 6),
       ],
     );
   }
@@ -282,7 +285,6 @@ class AdminAppDrawer extends StatelessWidget {
         selectedTileColor: AppColors.accent.withValues(alpha: 0.12),
         hoverColor: AppColors.accent.withValues(alpha: 0.05),
         onTap: () {
-          // Same navigation flow as before.
           if (context != null) {
             Navigator.pop(context);
           }
