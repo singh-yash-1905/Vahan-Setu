@@ -1,4 +1,4 @@
-import 'package:vahan_setu/features/dashboard/data/user_model.dart';
+import 'package:vahan_setu/features/auth/data/user_model.dart';
 
 abstract class AuthState {}
 
@@ -22,3 +22,15 @@ class AuthProfileLoaded extends AuthState {
 }
 
 class AuthPasswordChanged extends AuthState {}
+
+class UserDetailLoading extends AuthState {}
+
+class UserDetailLoaded extends AuthState {
+  final UserModel user;
+  UserDetailLoaded(this.user);
+}
+
+class UserDetailError extends AuthState {
+  final String message;
+  UserDetailError(this.message);
+}

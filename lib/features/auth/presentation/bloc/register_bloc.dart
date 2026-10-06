@@ -14,6 +14,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<LogoutRequested>(_onLogoutRequested);
     on<FetchAdminProfile>(_onFetchAdminProfile);
     on<ChangePasswordRequested>(_onChangePasswordRequested);
+    on<FetchUserByIdEvent>(_onFetchUserById);
   }
 
   Future<void> _onLoginRequested(
@@ -100,6 +101,19 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(AuthPasswordChanged());
     } catch (e) {
       emit(AuthError(e.toString().replaceAll('Exception: ', '')));
+    }
+  }
+
+  Future<void> _onFetchUserById(
+    FetchUserByIdEvent event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(UserDetailLoading());
+    try {
+      final user = await authRepository.getUserById(event.userId);
+      emit(UserDetailLoaded(user));
+    } catch (e) {
+      emit(UserDetailError(e.toString().replaceAll('Exception: ', '')));
     }
   }
 }

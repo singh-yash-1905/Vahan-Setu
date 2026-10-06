@@ -29,6 +29,7 @@ class VehicleDetailLoaded extends VehicleState {
   final bool isDocumentsLoading;
   final bool isSpecificTaxLoading;
   final TaxModel? specificTax;
+  final bool isFastagUpdating;
 
   VehicleDetailLoaded({
     required this.vehicleDetail,
@@ -42,6 +43,7 @@ class VehicleDetailLoaded extends VehicleState {
     this.isDocumentsLoading = false,
     this.specificTax,
     this.isSpecificTaxLoading = false,
+    this.isFastagUpdating = false,
   });
 
   VehicleDetailLoaded copyWith({
@@ -56,6 +58,7 @@ class VehicleDetailLoaded extends VehicleState {
     bool? isDocumentsLoading,
     TaxModel? specificTax,
     bool? isSpecificTaxLoading,
+    bool? isFastagUpdating,
   }) {
     return VehicleDetailLoaded(
       vehicleDetail: vehicleDetail ?? this.vehicleDetail,
@@ -69,6 +72,7 @@ class VehicleDetailLoaded extends VehicleState {
       isDocumentsLoading: isDocumentsLoading ?? this.isDocumentsLoading,
       specificTax: specificTax ?? this.specificTax,
       isSpecificTaxLoading: isSpecificTaxLoading ?? this.isSpecificTaxLoading,
+      isFastagUpdating: isFastagUpdating ?? this.isFastagUpdating,
     );
   }
 }

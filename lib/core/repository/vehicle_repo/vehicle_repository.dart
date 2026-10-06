@@ -252,4 +252,66 @@ class VehicleRepository {
       throw Exception(e.toString());
     }
   }
+
+  Future<void> deleteVehicle(int vehicleId) async {
+    final url = Uri.parse('${ApiConstants.ngrokUrl}/vehicles/$vehicleId');
+
+    try {
+      final response = await _httpClient.delete(url);
+
+      // Handle both 200 (with body) and 204 (no content) successful responses
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        return;
+      }
+
+      final responseData = jsonDecode(response.body);
+
+      if (response.statusCode == 422) {
+        throw Exception('Validation Error: ${responseData['detail']}');
+      }
+
+      throw Exception(
+        responseData['message'] ??
+            'Failed to delete vehicle: ${response.statusCode}',
+      );
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
+
+  Future<FastagModel> updateVehicleFastag(
+    int vehicleId,
+    Map<String, dynamic> updateData,
+  ) async {
+    final url = Uri.parse(
+      '${ApiConstants.ngrokUrl}/vehicles/$vehicleId/fastag',
+    );
+
+    try {
+      final response = await _httpClient.put(url, body: jsonEncode(updateData));
+
+      final responseData = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data =
+            (responseData is Map &&
+                responseData.containsKey('data') &&
+                responseData['data'] != null)
+            ? responseData['data'] as Map<String, dynamic>
+            : responseData as Map<String, dynamic>;
+        return FastagModel.fromJson(data);
+      }
+
+      if (response.statusCode == 422) {
+        throw Exception('Validation Error: ${responseData['detail']}');
+      }
+
+      throw Exception(
+        responseData['message'] ??
+            'Failed to update fastag: ${response.statusCode}',
+      );
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
 }

@@ -4,7 +4,7 @@ import 'dart:developer';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:vahan_setu/core/network/api_constants.dart';
 import 'package:vahan_setu/core/network/custom_http_client.dart';
-import 'package:vahan_setu/features/dashboard/data/user_model.dart';
+import 'package:vahan_setu/features/auth/data/user_model.dart';
 
 class AuthRepository {
   final CustomHttpClient _httpClient;
@@ -238,6 +238,64 @@ class AuthRepository {
       }
     } catch (e) {
       throw Exception(e.toString());
+    }
+  }
+
+  Future<UserModel> getUserById(int userId) async {
+    final url = Uri.parse('${ApiConstants.ngrokUrl}/users/$userId');
+
+    try {
+      log('👤 FETCHING USER: $userId', name: 'AuthRepository');
+
+      log('🌐 USER URL: $url', name: 'AuthRepository');
+
+      final response = await _httpClient.get(url);
+
+      log(
+        '📥 USER RESPONSE [${response.statusCode}]: ${response.body}',
+        name: 'AuthRepository',
+      );
+
+      final responseData = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        final data = responseData['data'] ?? responseData;
+
+        if (data is! Map<String, dynamic>) {
+          throw Exception('Invalid user response format.');
+        }
+
+        return UserModel.fromJson(data);
+      }
+
+      if (response.statusCode == 401) {
+        throw Exception(
+          responseData['message'] ?? 'Unauthorized. Please log in again.',
+        );
+      }
+
+      if (response.statusCode == 404) {
+        throw Exception(
+          responseData['message'] ?? 'User with ID $userId was not found.',
+        );
+      }
+
+      if (response.statusCode == 422) {
+        throw Exception(
+          'Validation Error: '
+          '${responseData['detail'] ?? 'Unprocessable Entity'}',
+        );
+      }
+
+      throw Exception(
+        responseData['message'] ??
+            'Failed to fetch user details: '
+                '${response.statusCode}',
+      );
+    } catch (e) {
+      log('❌ GET USER ERROR: $e', name: 'AuthRepository');
+
+      throw Exception(e.toString().replaceFirst('Exception: ', ''));
     }
   }
 }

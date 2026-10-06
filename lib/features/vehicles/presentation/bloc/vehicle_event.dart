@@ -32,3 +32,9 @@ class FetchVehicleTax extends VehicleEvent {
   final int taxId;
   FetchVehicleTax(this.vehicleId, this.taxId);
 }
+
+class UpdateVehicleFastag extends VehicleEvent {
+  final int vehicleId;
+  final Map<String, dynamic> updateData;
+  UpdateVehicleFastag(this.vehicleId, this.updateData);
+}

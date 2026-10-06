@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
 import 'package:open_filex/open_filex.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../bloc/tanker_report_bloc.dart';
 import '../bloc/tanker_report_event.dart';
 import '../bloc/tanker_report_state.dart';
+import '../widgets/tanker_summary_row.dart';
+import '../widgets/tanker_report_card_item.dart';
 
 class TankerReportsTab extends StatefulWidget {
   const TankerReportsTab({super.key});
@@ -22,60 +23,52 @@ class _TankerReportsTabState extends State<TankerReportsTab> {
     context.read<TankerReportBloc>().add(FetchTankerReports());
   }
 
+  void _exportReports() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Generating Excel Report...'),
+        backgroundColor: AppColors.accent,
+        duration: Duration(seconds: 2),
+      ),
+    );
+    context.read<TankerReportBloc>().add(ExportTankerReportsEvent());
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text(
-          'Tanker Reports',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.textLight,
-        elevation: 0,
+        title: const Text('Tanker Entries'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.download),
-            tooltip: 'Export',
-            onPressed: () {
-              context.read<TankerReportBloc>().add(ExportTankerReportsEvent());
-            },
+            icon: const Icon(Icons.download_rounded),
+            tooltip: 'Export to Excel',
+            onPressed: _exportReports,
+          ),
+          IconButton(
+            icon: const Icon(Icons.refresh_rounded),
+            tooltip: 'Refresh',
+            onPressed: () =>
+                context.read<TankerReportBloc>().add(FetchTankerReports()),
           ),
         ],
       ),
       body: BlocConsumer<TankerReportBloc, TankerReportState>(
         listener: (context, state) async {
           if (state is TankerReportExportSuccess) {
+            ScaffoldMessenger.of(context).hideCurrentSnackBar();
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Excel file saved! Opening...')),
+              const SnackBar(
+                content: Text('Export successful. Opening file...'),
+                backgroundColor: AppColors.success,
+              ),
             );
-
-            // Opens the locally cached Excel file in the device's default viewer app
             try {
-              final result = await OpenFilex.open(state.downloadUrl);
-
-              if (result.type != ResultType.done) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Could not open file: ${result.message}'),
-                    ),
-                  );
-                }
-              }
-            } catch (e) {
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Error opening Excel file.')),
-                );
-              }
-            }
-
-            // Re-fetch list to restore normal view after export event
-            if (context.mounted) {
+              await OpenFilex.open(state.downloadUrl);
+            } catch (_) {}
+            if (context.mounted)
               context.read<TankerReportBloc>().add(FetchTankerReports());
-            }
           } else if (state is TankerReportError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -91,173 +84,54 @@ class _TankerReportsTabState extends State<TankerReportsTab> {
             return const Center(
               child: CircularProgressIndicator(color: AppColors.accent),
             );
-          } else if (state is TankerReportError) {
-            return Center(
-              child: Text(
-                state.message,
-                style: const TextStyle(color: AppColors.error),
-              ),
-            );
           } else if (state is TankerReportsLoaded) {
             final reports = state.reports;
-            if (reports.isEmpty) {
-              return const Center(
-                child: Text(
-                  'No Tanker Reports Found',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              );
-            }
+            final num totalFreight = reports.fold<num>(
+              0,
+              (sum, item) => sum + item.freight,
+            );
+            final num totalHsd = reports.fold<num>(
+              0,
+              (sum, item) => sum + (item.hsdLtr ?? 0),
+            );
 
             return RefreshIndicator(
               color: AppColors.accent,
-              onRefresh: () async {
-                context.read<TankerReportBloc>().add(FetchTankerReports());
-              },
-              child: ListView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: reports.length,
-                itemBuilder: (context, index) {
-                  final report = reports[index];
-                  final reportDateStr = report.reportDate != null
-                      ? DateFormat('dd MMM yyyy').format(report.reportDate!)
-                      : 'N/A';
-
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 16),
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: AppColors.surface,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: AppColors.border.withValues(alpha: 0.5),
+              onRefresh: () async =>
+                  context.read<TankerReportBloc>().add(FetchTankerReports()),
+              child: CustomScrollView(
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: TankerSummaryRow(
+                        totalFreight: totalFreight,
+                        totalHsd: totalHsd,
+                        recordCount: reports.length,
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primary.withValues(alpha: 0.04),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              report.vehicleNumber,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w900,
-                                fontSize: 18,
-                                color: AppColors.primaryDark,
-                              ),
+                  ),
+                  reports.isEmpty
+                      ? const SliverFillRemaining(
+                          hasScrollBody: false,
+                          child: Center(
+                            child: Text(
+                              'No tanker reports found.',
+                              style: TextStyle(color: AppColors.textSecondary),
                             ),
-                            Text(
-                              reportDateStr,
-                              style: const TextStyle(
-                                color: AppColors.textSecondary,
-                                fontWeight: FontWeight.w600,
-                              ),
+                          ),
+                        )
+                      : SliverPadding(
+                          padding: const EdgeInsets.all(16.0),
+                          sliver: SliverList(
+                            delegate: SliverChildBuilderDelegate(
+                              (context, index) =>
+                                  TankerReportCardItem(report: reports[index]),
+                              childCount: reports.length,
                             ),
-                          ],
+                          ),
                         ),
-                        const SizedBox(height: 12),
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.location_on,
-                              size: 16,
-                              color: AppColors.accent,
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                report.ulPoint,
-                                style: const TextStyle(
-                                  color: AppColors.textPrimary,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        const Divider(height: 1),
-                        const SizedBox(height: 12),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  'Freight',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: AppColors.textSecondary,
-                                  ),
-                                ),
-                                Text(
-                                  '₹${report.freight}',
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.success,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  'HSD Ltr',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: AppColors.textSecondary,
-                                  ),
-                                ),
-                                Text(
-                                  '${report.hsdLtr} L',
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.warning,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  'RTKM',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: AppColors.textSecondary,
-                                  ),
-                                ),
-                                Text(
-                                  '${report.rtkm}',
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.primary,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  );
-                },
+                ],
               ),
             );
           }

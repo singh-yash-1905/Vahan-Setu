@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
+import 'package:vahan_setu/features/aduit_logs/presentation/widgets/user_details_bottom_sheet.dart';
+import 'package:vahan_setu/features/auth/presentation/bloc/register_bloc.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../bloc/audit_log_bloc.dart';
 import '../bloc/audit_log_event.dart';
 import '../bloc/audit_log_state.dart';
+import '../widgets/audit_log_card.dart';
 
 class AuditLogsScreen extends StatefulWidget {
   const AuditLogsScreen({super.key});
@@ -18,7 +20,32 @@ class _AuditLogsScreenState extends State<AuditLogsScreen> {
   @override
   void initState() {
     super.initState();
-    context.read<AuditLogBloc>().add(FetchAuditLogs());
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
+      context.read<AuditLogBloc>().add(FetchAuditLogs());
+    });
+  }
+
+  void _showUserDetails(int userId) {
+    debugPrint('AUDIT LOG SCREEN: Opening user details');
+    debugPrint('AUDIT LOG SCREEN: User ID = $userId');
+
+    final authBloc = context.read<AuthBloc>();
+
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      useSafeArea: true,
+      builder: (_) {
+        return BlocProvider.value(
+          value: authBloc,
+          child: UserDetailBottomSheet(userId: userId),
+        );
+      },
+    );
   }
 
   @override
@@ -37,10 +64,12 @@ class _AuditLogsScreenState extends State<AuditLogsScreen> {
             return const Center(
               child: CircularProgressIndicator(color: AppColors.accent),
             );
-          } else if (state is AuditLogError) {
+          }
+
+          if (state is AuditLogError) {
             return Center(
               child: Padding(
-                padding: const EdgeInsets.all(20.0),
+                padding: const EdgeInsets.all(20),
                 child: Text(
                   state.message,
                   style: const TextStyle(color: AppColors.error, fontSize: 16),
@@ -48,7 +77,9 @@ class _AuditLogsScreenState extends State<AuditLogsScreen> {
                 ),
               ),
             );
-          } else if (state is AuditLogsLoaded) {
+          }
+
+          if (state is AuditLogsLoaded) {
             final logs = state.logs;
 
             if (logs.isEmpty) {
@@ -68,114 +99,17 @@ class _AuditLogsScreenState extends State<AuditLogsScreen> {
               itemCount: logs.length,
               itemBuilder: (context, index) {
                 final log = logs[index];
-                final isAuthAction =
-                    log.action == 'LOGIN' || log.action == 'REGISTER';
-                final iconColor = isAuthAction
-                    ? AppColors.success
-                    : AppColors.warning;
-                final icon = log.action == 'LOGIN'
-                    ? Icons.login
-                    : log.action == 'REGISTER'
-                    ? Icons.person_add
-                    : Icons.history;
 
-                final formattedDate = DateFormat('MMM dd, yyyy - hh:mm a')
-                    .format(log.createdAt.toLocal());
-
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: AppColors.surface,
-                    borderRadius: BorderRadius.circular(15),
-                    border: Border.all(
-                      color: AppColors.border.withValues(alpha: 0.55),
-                    ),
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Tinted Icon Container
-                      Container(
-                        width: 44,
-                        height: 44,
-                        decoration: BoxDecoration(
-                          color: iconColor.withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Icon(icon, size: 22, color: iconColor),
-                      ),
-                      const SizedBox(width: 12),
-
-                      // Content
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    log.action.replaceAll('_', ' '),
-                                    style: const TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w800,
-                                      color: AppColors.textPrimary,
-                                    ),
-                                  ),
-                                ),
-                                Text(
-                                  'ID: ${log.id}',
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w900,
-                                    color: AppColors.textSecondary,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              'Entity: ${log.entityType.toUpperCase()} (${log.entityId})\nUser ID: ${log.userId}',
-                              style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                                color: AppColors.textSecondary,
-                                height: 1.4,
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-                            // Pill Badge for Date
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: AppColors.primary.withValues(
-                                  alpha: 0.08,
-                                ),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Text(
-                                formattedDate,
-                                style: const TextStyle(
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.w800,
-                                  color: AppColors.primary,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+                return AuditLogCard(
+                  log: log,
+                  onTap: () {
+                    _showUserDetails(log.userId);
+                  },
                 );
               },
             );
           }
+
           return const Center(
             child: Text(
               'Initializing...',

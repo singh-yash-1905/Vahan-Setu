@@ -37,3 +37,8 @@ class ChangePasswordRequested extends AuthEvent {
     required this.newPassword,
   });
 }
+
+class FetchUserByIdEvent extends AuthEvent {
+  final int userId;
+  FetchUserByIdEvent(this.userId);
+}

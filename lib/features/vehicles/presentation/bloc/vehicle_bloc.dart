@@ -135,5 +135,27 @@ class VehicleBloc extends Bloc<VehicleEvent, VehicleState> {
         }
       }
     });
+    on<UpdateVehicleFastag>((event, emit) async {
+      if (state is VehicleDetailLoaded) {
+        final currentState = state as VehicleDetailLoaded;
+        emit(currentState.copyWith(isFastagUpdating: true));
+
+        try {
+          final updatedFastag = await _repository.updateVehicleFastag(
+            event.vehicleId,
+            event.updateData,
+          );
+          emit(
+            currentState.copyWith(
+              fastag: updatedFastag,
+              isFastagUpdating: false,
+            ),
+          );
+        } catch (e) {
+          emit(currentState.copyWith(isFastagUpdating: false));
+          // Optionally emit a side-effect error state here if needed
+        }
+      }
+    });
   }
 }
